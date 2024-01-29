@@ -122,7 +122,7 @@ class Ets_Leaky_To_Pmpro {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-ets-leaky-to-pmpro-public.php';
 
-		// require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ets-leaky-to-pmpro-users-csv.php';
+		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ets-leaky-to-pmpro-users-csv.php';
 
 
 		$this->loader = new Ets_Leaky_To_Pmpro_Loader();

@@ -76,10 +76,20 @@ require plugin_dir_path( __FILE__ ) . 'includes/class-ets-leaky-to-pmpro.php';
  *
  * @since    1.0.0
  */
+// Hook your plugin's initialization to run after the theme and plugins are loaded
+add_action( 'after_setup_theme', 'run_ets_leaky_to_pmpro', 11 );
+
+/**
+ * Begins execution of the plugin.
+ *
+ * Since everything within the plugin is registered via hooks,
+ * kicking off the plugin from this point in the file does
+ * not affect the page life cycle.
+ *
+ * @since    1.0.0
+ */
 function run_ets_leaky_to_pmpro() {
-
-	$plugin = new Ets_Leaky_To_Pmpro();
-	$plugin->run();
-
+    $plugin = new Ets_Leaky_To_Pmpro();
+    $plugin->run();
 }
-run_ets_leaky_to_pmpro();
+

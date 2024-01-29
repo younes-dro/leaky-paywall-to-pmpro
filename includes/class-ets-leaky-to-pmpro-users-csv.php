@@ -78,7 +78,7 @@ class ETS_LeakyToPMPro_Users_CSV {
     }
 
     private function get_current_mode() {
-        $settings = new Leaky_Paywall_Settings();
+                    $settings = new Leaky_Paywall_Settings();
         $s = $settings->get_settings();
         $mode     = 'off' === $s['test_mode'] ? 'live' : 'test';
 
