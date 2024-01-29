@@ -191,8 +191,8 @@ class ETS_LeakyToPMPro_Users_CSV {
                 $this->get_membership_id( $user_id ),
                 '',  // membership_code_id - not available in Leaky Paywall
                 $this->get_membership_initial_payment( $user_id ),
-                $this->get_membership_timestamp(),
-                $this->get_membership_billing_amount(),
+                $this->get_membership_timestamp( $user_id),
+                $this->get_membership_billing_amount( $user_id),
                 $this->get_membership_cycle_number(),
                 $this->get_membership_cycle_period(),
                 '',  // membership_billing_limit - not available in Leaky Paywall
@@ -201,7 +201,7 @@ class ETS_LeakyToPMPro_Users_CSV {
                 $this->get_member_status( $user_id ),
                 $this->get_membership_startdate(),
                 $this->get_membership_enddate(),
-                $this->get_membership_timestamp(),
+                $this->get_membership_timestamp( $user_id),
                 $this->get_membership_subscription_transaction_id(),
                 $this->get_membership_gateway(),
                 $this->get_membership_payment_transaction_id(),
@@ -292,6 +292,72 @@ class ETS_LeakyToPMPro_Users_CSV {
 
         return $levels[ $level_id ]['price'];
     }
+
+    /**
+     * Get membership cycle number.
+     *
+     * @return string
+     */
+    private function get_membership_cycle_number() {
+        
+        return '';
+    }
+
+    /**
+     * Get membership cycle period.
+     *
+     * @return string
+     */
+    private function get_membership_cycle_period() {
+        
+        return '';
+    }
+
+    /**
+     * Get membership billing limit.
+     *
+     * @return string
+     */
+    private function get_membership_billing_limit() {
+        
+        return '';
+    }
+
+    /**
+     * Get membership trial amount.
+     *
+     * @return string
+     */
+    private function get_membership_trial_amount() {
+        
+        return '';
+
+    }
+
+    private function get_member_status(){
+        return '';
+    }
+    private function get_membership_startdate() {
+        return '';
+    }
+    
+    private function get_membership_enddate() {
+        return '';
+    }
+    
+    
+    private function get_membership_subscription_transaction_id() {
+        return '';
+    }
+    
+    private function get_membership_gateway() {
+        return '';
+    }
+    
+    private function get_membership_payment_transaction_id() {
+        return '';
+    }
+        
 
 }
 
