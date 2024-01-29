@@ -268,6 +268,31 @@ class ETS_LeakyToPMPro_Users_CSV {
          return $price;
     }
 
+    /**
+     * Undocumented function
+     *
+     * @param [type] $user_id
+     * @return void
+     */
+    private function get_membership_timestamp( $user_id ){
+        $created = get_user_meta( $user_id, '_issuem_leaky_paywall_' . $this->mode . '_created', true );
+        return $created;
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @param [type] $user_id
+     * @return void
+     */
+    private function get_membership_billing_amount( $user_id ) {
+        $level_id = $this->get_membership_id( $user_id );
+        $allsettings = get_option( 'issuem-leaky-paywall' );
+        $levels = $allsettings['levels'];
+
+        return $levels[ $level_id ]['price'];
+    }
+
 }
 
 // Initialize the class
