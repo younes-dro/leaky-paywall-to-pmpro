@@ -1,32 +1,39 @@
 (function( $ ) {
 	'use strict';
+	jQuery(document).ready(function($){
 
-	/**
-	 * All of the code for your admin-facing JavaScript source
-	 * should reside in this file.
-	 *
-	 * Note: It has been assumed you will write jQuery code here, so the
-	 * $ function reference has been prepared for usage within the scope
-	 * of this function.
-	 *
-	 * This enables you to define handlers, for when the DOM is ready:
-	 *
-	 * $(function() {
-	 *
-	 * });
-	 *
-	 * When the window is loaded:
-	 *
-	 * $( window ).load(function() {
-	 *
-	 * });
-	 *
-	 * ...and/or other possibilities.
-	 *
-	 * Ideally, it is not considered best practise to attach more than a
-	 * single DOM-ready or window-load handler for a particular page.
-	 * Although scripts in the WordPress core, Plugins and Themes may be
-	 * practising this, we should strive to set a better example in our own work.
-	 */
+		// console.log(ets_leaky_to_pmpro_js_params);
+	
+			$('#ets-leaky-to-pmpro-generate-csv').on('click', function (e) {
+				e.preventDefault();
+				var $this = $(this);
+				$.ajax({
+					url: ets_leaky_to_pmpro_js_params.admin_ajax,
+					type: "POST",
+					context: this,
+					data: {
+						'action': 'ets_leaky_to_pmpro_generate_csv',
+						'ets_leaky_to_pmpro_nonce': ets_leaky_to_pmpro_js_params.ets_leaky_to_pmpro_nonce
+					},
+					beforeSend: function () {
+						$this.attr("disabled", true);
+						$this.siblings('#ets-leaky-to-pmpro-spinner').addClass('loading');
+					},
+					success: function (data) {
+						// console.log(data);
+						$('#ets-leaky-to-pmpro-message').html(data);
+					},
+					error: function (response, textStatus, errorThrown) {
+						console.log(textStatus + " :  " + response.status + " : " + errorThrown);
+					},
+					complete: function () {
+						$this.attr("disabled", false);
+						$this.siblings('#ets-leaky-to-pmpro-spinner').removeClass('loading');
+					},
+				});
+			});
+		
+
+	});
 
 })( jQuery );

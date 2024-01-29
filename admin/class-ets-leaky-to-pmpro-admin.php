@@ -73,7 +73,7 @@ class Ets_Leaky_To_Pmpro_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ets-leaky-to-pmpro-admin.css', array(), $this->version, 'all' );
+		wp_register_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/ets-leaky-to-pmpro-admin.css', array(), $this->version, 'all' );
 
 	}
 
@@ -96,8 +96,42 @@ class Ets_Leaky_To_Pmpro_Admin {
 		 * class.
 		 */
 
-		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ets-leaky-to-pmpro-admin.js', array( 'jquery' ), $this->version, false );
+		wp_register_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ets-leaky-to-pmpro-admin.js', array( 'jquery' ), $this->version, false );
+		$script_params = array(
+			'admin_ajax'                     => admin_url( 'admin-ajax.php' ),
+			'is_admin'                       => is_admin(),
+			'ets_leaky_to_pmpro_nonce' => wp_create_nonce( 'ets-leaky-to-pmpro--ajax-nonce' ),
+		);
+		wp_localize_script( $this->plugin_name, 'ets_leaky_to_pmpro_js_params', $script_params );
 
 	}
+
+	/**
+	 * Function to register the submenu page under Tolls
+	 *
+	 * @return void
+	 */
+	public function ets_leaky_to_pmpro_submenu() {
+		add_submenu_page(
+			'tools.php',
+			esc_html__( 'Leaky Paywall to PMPro Migrator', 'ets-leaky-to-pmpro' ),
+			esc_html__( 'Leaky Paywall to PMPro Migrator', 'ets-leaky-to-pmpro' ),
+			'manage_options',
+			esc_html__( 'leaky-to-pmpro-migrator', 'ets-leaky-to-pmpro' ),
+			array( $this, 'ets_leaky_to_pmpro_page' )
+		);
+	}
+
+	/**
+	 * Callback function to display the page content
+	 *
+	 * @return void
+	 */
+	public function ets_leaky_to_pmpro_page() {
+		wp_enqueue_style( $this->plugin_name );
+		wp_enqueue_script( $this->plugin_name );
+
+		require_once ETS_LEAKY_TO_PMPRO_PLUGIN_DIR_PATH . 'admin/partials/ets-leaky-to-pmpro-admin-display.php';
+	}	
 
 }

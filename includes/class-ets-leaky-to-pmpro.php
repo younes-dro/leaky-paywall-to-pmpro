@@ -122,6 +122,9 @@ class Ets_Leaky_To_Pmpro {
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'public/class-ets-leaky-to-pmpro-public.php';
 
+		// require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-ets-leaky-to-pmpro-users-csv.php';
+
+
 		$this->loader = new Ets_Leaky_To_Pmpro_Loader();
 
 	}
@@ -156,6 +159,7 @@ class Ets_Leaky_To_Pmpro {
 
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_styles' );
 		$this->loader->add_action( 'admin_enqueue_scripts', $plugin_admin, 'enqueue_scripts' );
+		$this->loader->add_action( 'admin_menu', $plugin_admin, 'ets_leaky_to_pmpro_submenu' );
 
 	}
 
