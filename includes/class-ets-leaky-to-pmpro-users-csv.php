@@ -77,8 +77,12 @@ class ETS_LeakyToPMPro_Users_CSV {
         $this->mode = $this->get_current_mode();
     }
 
+    /***
+     * 
+     * 
+     */
     private function get_current_mode() {
-                    $settings = new Leaky_Paywall_Settings();
+        $settings = new Leaky_Paywall_Settings();
         $s = $settings->get_settings();
         $mode     = 'off' === $s['test_mode'] ? 'live' : 'test';
 
@@ -142,25 +146,30 @@ class ETS_LeakyToPMPro_Users_CSV {
         $headers = array(
             'user_login',
             'user_email',
+            'user_pass',
             'first_name',
             'last_name',
-            'user_pass',
             'display_name',
             'role',
             'membership_id',
+            'membership_code_id',
             'membership_initial_payment',
-            'membership_timestamp',
             'membership_billing_amount',
             'membership_cycle_number',
             'membership_cycle_period',
+            'membership_billing_limit',
+            'membership_trial_amount',
+            'membership_trial_limit',
             'membership_status',
             'membership_startdate',
             'membership_enddate',
-            'membership_timestamp',
             'membership_subscription_transaction_id',
             'membership_gateway',
             'membership_payment_transaction_id',
+            'membership_affiliate_id',
+            'membership_timestamp',
         );
+        
 
         fputcsv( $handle, $headers );
 
@@ -174,25 +183,32 @@ class ETS_LeakyToPMPro_Users_CSV {
             $row = array(
                 $user->user_login,
                 $user->user_email,
+                $user->user_pass,
                 $user->first_name,
                 $user->last_name,
-                $user->user_pass,
                 $user->display_name,
                 $this->get_member_role( $user_id ),
-                $this->get_membership_id( $user_id),
+                $this->get_membership_id( $user_id ),
+                '',  // membership_code_id - not available in Leaky Paywall
                 $this->get_membership_initial_payment( $user_id ),
-                $this->get_membership_timestamp( ),
-                $this->get_membership_billing_amount( ),
-                $this->get_membership_cycle_number(  ),
-                $this->get_membership_cycle_period( ),
-                $this->get_member_status(  ),
-                $this->get_membership_startdate(  ),
-                $this->get_membership_enddate(  ),
-                $this->get_membership_timestamp(  ),
-                $this->get_membership_subscription_transaction_id(  ),
+                $this->get_membership_timestamp(),
+                $this->get_membership_billing_amount(),
+                $this->get_membership_cycle_number(),
+                $this->get_membership_cycle_period(),
+                '',  // membership_billing_limit - not available in Leaky Paywall
+                '',  // membership_trial_amount - not available in Leaky Paywall
+                '',  // membership_trial_limit - not available in Leaky Paywall
+                $this->get_member_status( $user_id ),
+                $this->get_membership_startdate(),
+                $this->get_membership_enddate(),
+                $this->get_membership_timestamp(),
+                $this->get_membership_subscription_transaction_id(),
                 $this->get_membership_gateway(),
-                $this->get_membership_payment_transaction_id( ),
+                $this->get_membership_payment_transaction_id(),
+                '',  // membership_affiliate_id - not available in Leaky Paywall
+                '',  // membership_timestamp - not available in Leaky Paywall
             );
+            
 
             
             fputcsv( $handle, $row );
@@ -214,10 +230,13 @@ class ETS_LeakyToPMPro_Users_CSV {
 	 * @return string Member role.
 	 */
 	private function get_member_role( $user_id ) {
-		$user_data = get_userdata( $user_id );
-		$role      = ! empty( $user_data->roles[0] ) ? $user_data->roles[0] : 'none';
 
-		return $role;
+        return 'subscriber';
+
+		// $user_data = get_userdata( $user_id );
+		// $role      = ! empty( $user_data->roles[0] ) ? $user_data->roles[0] : 'none';
+
+		// return $role;
 	}
 
 	/**
