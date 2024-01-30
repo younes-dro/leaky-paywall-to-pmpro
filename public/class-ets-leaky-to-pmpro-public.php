@@ -44,13 +44,13 @@ class Ets_Leaky_To_Pmpro_Public {
 	 * Initialize the class and set its properties.
 	 *
 	 * @since    1.0.0
-	 * @param      string    $plugin_name       The name of the plugin.
-	 * @param      string    $version    The version of this plugin.
+	 * @param      string $plugin_name       The name of the plugin.
+	 * @param      string $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
 
 		$this->plugin_name = $plugin_name;
-		$this->version = $version;
+		$this->version     = $version;
 
 	}
 
@@ -99,5 +99,24 @@ class Ets_Leaky_To_Pmpro_Public {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/ets-leaky-to-pmpro-public.js', array( 'jquery' ), $this->version, false );
 
 	}
+
+
+	/**
+	 * Callback function to restrict comments for non-members.
+	 *
+	 * @param bool $show_comment Whether to show comments.
+	 * @param int  $post_id      ID of the post.
+	 * @return bool  $show_comment Updated value of whether to show comments.
+	 */
+	public function ets_leaky_to_pmpro_restrict_comments_for_non_members( $show_comment, $post_id ) {
+
+		if ( ! pmpro_hasMembershipLevel( 1 ) ) {
+
+			$show_comment = false;
+		}
+
+		return $show_comment;
+	}
+
 
 }
