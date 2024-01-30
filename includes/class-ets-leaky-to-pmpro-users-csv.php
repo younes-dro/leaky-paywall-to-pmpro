@@ -105,37 +105,41 @@ class ETS_LeakyToPMPro_Users_CSV {
 	 * - leaky_paywall_user_has_access()
 	 * - leaky_paywall_subscriber_current_level_id() // Return level id for user
 	 */
-	public function generate_csv() {
+	public function generate_csv( $user_id = '' ) {
 		global $wpdb;
 		$mode = $this->mode;
 
-		$sql = $wpdb->prepare(
-			"
-            SELECT
-                u.ID as user_id,
-                u.user_login,
-                u.user_email,
-                um.meta_key,
-                um.meta_value
-            FROM
-                {$wpdb->users} u
-            JOIN
-                {$wpdb->usermeta} um ON u.ID = um.user_id
-            WHERE
-                um.meta_key LIKE %s
-                AND um.meta_key LIKE %s
-                AND um.meta_value = %s
-                AND um.meta_key LIKE %s
-            ",
-			'_issuem_leaky_paywall_%',
-			'%_payment_status',
-			'active',
-			'_issuem_leaky_paywall_' . $mode . '%'
+		// $sql = $wpdb->prepare(
+		// "
+		// SELECT
+		// u.ID as user_id,
+		// u.user_login,
+		// u.user_email,
+		// um.meta_key,
+		// um.meta_value
+		// FROM
+		// {$wpdb->users} u
+		// JOIN
+		// {$wpdb->usermeta} um ON u.ID = um.user_id
+		// WHERE
+		// um.meta_key LIKE %s
+		// AND um.meta_key LIKE %s
+		// AND um.meta_value = %s
+		// AND um.meta_key LIKE %s
+		// ",
+		// '_issuem_leaky_paywall_%',
+		// '%_payment_status',
+		// 'active',
+		// '_issuem_leaky_paywall_' . $mode . '%'
+		// );
+		// $results = $wpdb->get_results( $sql, ARRAY_A );
+		$args = array(
+			'filter-level'  => 1,
+			'filter-status' => 'active',
+			'user-type'     => 'lpsubs',
 		);
 
-		update_option( 'psypost_sql', $sql );
-
-		$results = $wpdb->get_results( $sql, ARRAY_A );
+		$active_members = leaky_paywall_subscriber_query( $args );
 
 		$date     = date( 'd-m-y-' . substr( (string) microtime(), 1, 8 ) );
 		$date     = str_replace( '.', '', $date );
@@ -174,8 +178,8 @@ class ETS_LeakyToPMPro_Users_CSV {
 
 		fputcsv( $handle, $headers );
 
-		foreach ( $results as $result ) {
-			$user_id = $result['user_id'];
+		foreach ( $active_members as $member ) {
+			$user_id = $member->ID;
 			$user    = new WP_User( $user_id );
 			if ( ! $user->exists() ) {
 				continue;
@@ -203,7 +207,7 @@ class ETS_LeakyToPMPro_Users_CSV {
 				$this->get_membership_enddate( $user_id ),
 				$this->get_membership_subscription_transaction_id( $user_id ),
 				$this->get_membership_gateway(),
-				$this->get_membership_payment_transaction_id(),
+				$this->get_membership_payment_transaction_id( $user_id ),
 				'',  // membership_affiliate_id - not available in Leaky Paywall
 				$this->get_membership_timestamp( $user_id ),  // membership_timestamp - not available in Leaky Paywall
 			);
@@ -342,7 +346,7 @@ class ETS_LeakyToPMPro_Users_CSV {
 	 *
 	 * @return string
 	 */
-	private function get_member_status() {
+	private function get_member_status( $user_id ) {
 		$status = get_user_meta( $user_id, '_issuem_leaky_paywall_' . $this->mode . '_payment_status', true );
 		return $status;
 
