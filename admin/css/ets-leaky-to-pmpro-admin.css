@@ -1,0 +1,54 @@
+/**
+ * All of the CSS for your admin-specific functionality should be
+ * included in this file.
+ */
+ /* Add this CSS code to your theme's style.css file or use the WordPress Customizer */
+
+.ets-leaky-to-pmpro-container {
+    max-width: 600px;
+    margin: 50px auto;
+    text-align: center;
+}
+
+.ets-leaky-to-pmpro-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+}
+
+#ets-leaky-to-pmpro-message {
+    margin-bottom: 20px;
+}
+
+#ets-leaky-to-pmpro-generate-csv {
+    font-size: 16px;
+    padding: 10px 20px;
+}
+
+.ets-leaky-to-pmpro-spinner {
+    display: none;
+    margin-top: 20px;
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    border-radius: 50%;
+    border-top: 4px solid #3498db;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+.loading{
+    display: block;
+}
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ets-leaky-to-pmpro-loading .ets-leaky-to-pmpro-spinner {
+    display: block;
+}
+
+.ets-leaky-to-pmpro-loading #ets-leaky-to-pmpro-generate-csv {
+    pointer-events: none;
+    opacity: 0.5;
+}
+
