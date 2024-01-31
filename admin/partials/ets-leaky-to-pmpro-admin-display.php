@@ -19,7 +19,8 @@
 <div class="ets-leaky-to-pmpro-container">
 	<h1 class="ets-leaky-to-pmpro-title"><?php esc_html_e( 'Leaky Paywall to PMPro Migration', 'ets-leaky-to-pmpro' ); ?></h1>
 	<div id="ets-leaky-to-pmpro-message"></div>
-<button id="ets-leaky-to-pmpro-generate-csv" class="button button-primary"><?php esc_html_e( 'Generate CSV', 'ets-leaky-to-pmpro' ); ?></button>
+<button id="ets-leaky-to-pmpro-generate-csv" class="button button-primary ets-leaky-to-pmpro-generate-csv"><?php esc_html_e( 'Generate CSV ( Premium )', 'ets-leaky-to-pmpro' ); ?></button>
+<button id="ets-leaky-to-pmpro-generate-csv-digital-access" class="button button-primary ets-leaky-to-pmpro-generate-csv"><?php esc_html_e( 'Generate CSV ( Digitital Access )', 'ets-leaky-to-pmpro' ); ?></button>
 <div id="ets-leaky-to-pmpro-spinner" class="ets-leaky-to-pmpro-spinner"></div>
 </div>
 

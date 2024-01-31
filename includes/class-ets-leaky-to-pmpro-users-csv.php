@@ -96,7 +96,126 @@ class ETS_LeakyToPMPro_Users_CSV {
 	 */
 	public function init() {
 		add_action( 'wp_ajax_ets_leaky_to_pmpro_generate_csv', array( $this, 'generate_csv' ), 10 );
+		add_action( 'wp_ajax_ets_leaky_to_pmpro_generate_csv_digital_access', array( $this, 'generate_csv_digital_access_batched' ), 10 );
 	}
+
+	/**
+	 * Generate CSV files for user migration in batches.
+	 *
+	 * Functions to use:
+	 * - leaky_paywall_user_has_access()
+	 * - leaky_paywall_subscriber_current_level_id() // Return level id for user
+	 */
+	public function generate_csv_digital_access_batched() {
+		global $wpdb;
+
+		$mode = leaky_paywall_get_current_mode();
+
+		$sql = $wpdb->prepare(
+			"
+        SELECT
+            u.ID as user_id
+        FROM
+            {$wpdb->users} u
+        JOIN
+            {$wpdb->usermeta} um1 ON u.ID = um1.user_id
+        JOIN
+            {$wpdb->usermeta} um2 ON u.ID = um2.user_id
+        WHERE
+            (um1.meta_key = '_issuem_leaky_paywall_{$mode}_level_id' AND um1.meta_value LIKE %s)
+            AND (um2.meta_key = '_issuem_leaky_paywall_{$mode}_payment_status' AND um2.meta_value = %s)
+        ",
+			'%0%',
+			'active'
+		);
+
+		$active_members = $wpdb->get_col( $sql );
+
+		$user_batches = array_chunk( $active_members, 400 );
+
+		foreach ( $user_batches as $batch_index => $user_batch ) {
+
+			$date     = date( 'd-m-y-' . substr( (string) microtime(), 1, 8 ) );
+			$date     = str_replace( '.', '', $date );
+			$filename = "ets-leaky-pmpro-digital-access-subscribers-batch-{$batch_index}-{$date}.csv";
+			$filePath = $this->csv_folder . '/' . $filename;
+			$handle   = fopen( $filePath, 'w' );
+
+			fputs( $handle, "\xEF\xBB\xBF" ); // UTF-8 BOM
+
+			$headers = array(
+				'user_login',
+				'user_email',
+				'user_pass',
+				'first_name',
+				'last_name',
+				'display_name',
+				'role',
+				'membership_id',
+				'membership_code_id',
+				'membership_initial_payment',
+				'membership_billing_amount',
+				'membership_cycle_number',
+				'membership_cycle_period',
+				'membership_billing_limit',
+				'membership_trial_amount',
+				'membership_trial_limit',
+				'membership_status',
+				'membership_startdate',
+				'membership_enddate',
+				'membership_subscription_transaction_id',
+				'membership_gateway',
+				'membership_payment_transaction_id',
+				'membership_affiliate_id',
+				'membership_timestamp',
+			);
+
+			fputcsv( $handle, $headers );
+
+			foreach ( $user_batch as $user_id ) {
+				$user = new WP_User( $user_id );
+				if ( ! $user->exists() ) {
+					continue;
+				}
+
+				$row = array(
+					$user->user_login,
+					$user->user_email,
+					$user->user_pass,
+					$user->first_name,
+					$user->last_name,
+					$user->display_name,
+					$this->get_member_role( $user_id ),
+					'2',
+					'',  // membership_code_id - not available in Leaky Paywall
+					'',
+					'',
+					'',
+					'',
+					'',  // membership_billing_limit - not available in Leaky Paywall
+					'',
+					'',  // membership_trial_limit - not available in Leaky Paywall
+					$this->get_member_status( $user_id ),
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',  // membership_affiliate_id - not available in Leaky Paywall
+					$this->get_membership_timestamp( $user_id ),  // membership_timestamp - not available in Leaky Paywall
+				);
+
+				fputcsv( $handle, $row );
+			}
+
+			fclose( $handle );
+			$upload_dir = wp_upload_dir();
+			echo '<a href="' . $upload_dir['baseurl'] . '/' . ETS_LEAKY_TO_PMPRO_CSV_FOLDER . '/' . $filename . '"><span class="dashicons dashicons-download"></span>Download : ' . $filename . '</a><br>';
+		}
+
+		exit();
+	}
+
 
 	/**
 	 * Generate CSV file for user migration.
