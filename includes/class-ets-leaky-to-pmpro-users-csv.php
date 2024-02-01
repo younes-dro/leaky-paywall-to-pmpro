@@ -98,6 +98,7 @@ class ETS_LeakyToPMPro_Users_CSV {
 		add_action( 'wp_ajax_ets_leaky_to_pmpro_generate_csv', array( $this, 'generate_csv' ), 10 );
 		add_action( 'wp_ajax_ets_leaky_to_pmpro_generate_csv_digital_access', array( $this, 'generate_csv_digital_access_batched' ), 10 );
 		add_action( 'wp_ajax_ets_leaky_to_pmpro_generate_csv_check_premium', array( $this, 'generate_premium_csv_not_in_pmpro' ), 10 );
+		add_action( 'wp_ajax_ets_leaky_to_pmpro_generate_csv_check_digital_access', array( $this, 'generate_digital_access_csv_not_in_pmpro' ), 10 );
 	}
 
 	/**
@@ -588,7 +589,7 @@ class ETS_LeakyToPMPro_Users_CSV {
 
 		$date     = date( 'd-m-y-' . substr( (string) microtime(), 1, 8 ) );
 		$date     = str_replace( '.', '', $date );
-		$filename = 'ets-leaky-pmpro-not-in-pmpro-' . $date . '.csv';
+		$filename = 'ets-leaky-pmpro-premium-not-in-pmpro-' . $date . '.csv';
 		$filePath = $this->csv_folder . '/' . $filename;
 		$handle   = fopen( $filePath, 'w' );
 
@@ -671,6 +672,139 @@ class ETS_LeakyToPMPro_Users_CSV {
 					$this->get_membership_payment_transaction_id( $user['user_id'] ),
 					'',  // membership_affiliate_id - not available in Leaky Paywall
 					$this->get_membership_timestamp( $user['user_id'] ),  // membership_timestamp - not available in Leaky Paywall
+				);
+
+				fputcsv( $handle, $row );
+			}
+		}
+
+		fclose( $handle );
+		$upload_dir = wp_upload_dir();
+		echo '<a href="' . $upload_dir['baseurl'] . '/' . ETS_LEAKY_TO_PMPRO_CSV_FOLDER . '/' . $filename . '">Download : ' . $filename . '</a>';
+
+		exit();
+	}
+
+	/**
+	 * Generate CSV file for Leaky Paywall Digital Access members not in PMPro custom table.
+	 *
+	 * This function queries the WordPress database to identify active Leaky Paywall Digital Access
+	 * members (level 0) and checks if they are not present in the PMPro custom table. If a
+	 * Digital Access member is not found in the PMPro table, their information is added to a CSV file
+	 * for later use in the migration process.
+	 *
+	 * @since 1.0.5
+	 */
+	public function generate_digital_access_csv_not_in_pmpro() {
+		global $wpdb;
+
+		$mode = leaky_paywall_get_current_mode();
+
+		$sql = $wpdb->prepare(
+			"
+        SELECT
+            u.ID as user_id
+        FROM
+            {$wpdb->users} u
+        JOIN
+            {$wpdb->usermeta} um1 ON u.ID = um1.user_id
+        JOIN
+            {$wpdb->usermeta} um2 ON u.ID = um2.user_id
+        WHERE
+            (um1.meta_key = '_issuem_leaky_paywall_{$mode}_level_id' AND um1.meta_value LIKE %s)
+            AND (um2.meta_key = '_issuem_leaky_paywall_{$mode}_payment_status' AND um2.meta_value = %s)
+        ",
+			'%0%',
+			'active'
+		);
+
+		$active_members = $wpdb->get_results( $sql, ARRAY_A );
+
+		$date     = date( 'd-m-y-' . substr( (string) microtime(), 1, 8 ) );
+		$date     = str_replace( '.', '', $date );
+		$filename = 'ets-leaky-pmpro-digital-access-not-in-pmpro-' . $date . '.csv';
+		$filePath = $this->csv_folder . '/' . $filename;
+		$handle   = fopen( $filePath, 'w' );
+
+		fputs( $handle, "\xEF\xBB\xBF" ); // UTF-8 BOM
+
+		$headers = array(
+			'user_login',
+			'user_email',
+			'user_pass',
+			'first_name',
+			'last_name',
+			'display_name',
+			'role',
+			'membership_id',
+			'membership_code_id',
+			'membership_initial_payment',
+			'membership_billing_amount',
+			'membership_cycle_number',
+			'membership_cycle_period',
+			'membership_billing_limit',
+			'membership_trial_amount',
+			'membership_trial_limit',
+			'membership_status',
+			'membership_startdate',
+			'membership_enddate',
+			'membership_subscription_transaction_id',
+			'membership_gateway',
+			'membership_payment_transaction_id',
+			'membership_affiliate_id',
+			'membership_timestamp',
+		);
+
+		fputcsv( $handle, $headers );
+
+		$pmpro_table = $wpdb->prefix . 'pmpro_memberships_users';
+
+		foreach ( $active_members as $user ) {
+
+			$sql_pmpro = $wpdb->prepare(
+				"
+            SELECT user_id
+            FROM $pmpro_table
+            WHERE user_id = %d
+            ",
+				$user['user_id']
+			);
+
+			$pmpro_member = $wpdb->get_row( $sql_pmpro, ARRAY_A );
+
+			if ( empty( $pmpro_member ) ) {
+				// Leaky Paywall member not found in PMPro, add to CSV
+				$user_obj = new WP_User( $user['user_id'] );
+
+				if ( ! $user_obj->exists() ) {
+					continue;
+				}
+
+				$row = array(
+					$user_obj->user_login,
+					$user_obj->user_email,
+					$user_obj->user_pass,
+					$user_obj->first_name,
+					$user_obj->last_name,
+					$user_obj->display_name,
+					$this->get_member_role( $user['user_id'] ),
+					'2',
+					'',  // membership_code_id - not available in Leaky Paywall
+					'',
+					'',
+					'',
+					'',
+					'',  // membership_billing_limit - not available in Leaky Paywall
+					'',
+					'',  // membership_trial_limit - not available in Leaky Paywall
+					$this->get_member_status( $user['user_id'] ),
+					'',
+					'',
+					'',
+					'',
+					'',
+					'',  // membership_affiliate_id - not available in Leaky Paywall
+					$this->get_membership_timestamp( $user['user_id'] ),
 				);
 
 				fputcsv( $handle, $row );
