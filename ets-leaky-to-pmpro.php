@@ -16,7 +16,7 @@
  * Plugin Name:       Ets Leaky Paywall To PMPro
  * Plugin URI:        https://expresstechsoftwares.com
  * Description:       LeakyToPMPro Migrator seamlessly transfers subscribers from Leaky Paywall to Paid Memberships Pro (PMPro), ensuring a smooth transition. With this plugin, subscribers gain exclusive privileges, enabling them to comment on and like posts, creating an enhanced and engaging community experience
- * Version:           1.0.0
+ * Version:           1.0.3
  * Author:            ExpressTech Softwares Solutions Pvt Ltd
  * Author URI:        https://expresstechsoftwares.com/
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'ETS_LEAKY_TO_PMPRO_VERSION', '1.0.0' );
+define( 'ETS_LEAKY_TO_PMPRO_VERSION', '1.0.3' );
 define( 'ETS_LEAKY_TO_PMPRO_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ETS_LEAKY_TO_PMPRO_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 define( 'ETS_LEAKY_TO_PMPRO_CSV_FOLDER', 'ets-leaky-to-pmpro-csv' );
@@ -89,7 +89,7 @@ add_action( 'after_setup_theme', 'run_ets_leaky_to_pmpro', 11 );
  * @since    1.0.0
  */
 function run_ets_leaky_to_pmpro() {
-    $plugin = new Ets_Leaky_To_Pmpro();
-    $plugin->run();
+	$plugin = new Ets_Leaky_To_Pmpro();
+	$plugin->run();
 }
 
