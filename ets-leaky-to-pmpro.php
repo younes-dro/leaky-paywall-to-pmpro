@@ -90,7 +90,7 @@ add_action( 'after_setup_theme', 'run_ets_leaky_to_pmpro', 11 );
  */
 function run_ets_leaky_to_pmpro() {
 	if ( ! is_plugin_active( 'leaky-paywall/leaky-paywall.php' ) ) {
-		// Deactivate your plugin if Leaky Paywall is not active
+		// Deactivate The plugin if Leaky Paywall is not active
 		deactivate_plugins( plugin_basename( __FILE__ ) );
 		return;
 	}
@@ -98,5 +98,30 @@ function run_ets_leaky_to_pmpro() {
 	$plugin = new Ets_Leaky_To_Pmpro();
 	$plugin->run();
 }
+
+/**
+ * Custom filter to conditionally allow ad injection based on membership level.
+ *
+ * @param bool   $can_inject Whether the ad can be injected.
+ * @param string $content    Post content.
+ * @param array  $placements Ad placements.
+ *
+ * @return bool Whether the ad can be injected.
+ */
+function custom_advanced_ads_can_inject_into_content( $can_inject, $content, $placements ) {
+
+	if ( is_user_logged_in() && function_exists( 'pmpro_hasMembershipLevel' ) ) {
+		$user_id = get_current_user_id();
+
+		if ( pmpro_hasMembershipLevel( 1, $user_id ) ) {
+			return false;
+		}
+	}
+
+	return $can_inject;
+}
+add_filter( 'advanced-ads-can-inject-into-content', 'custom_advanced_ads_can_inject_into_content', 10, 3 );
+
+
 
 
