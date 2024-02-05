@@ -89,7 +89,14 @@ add_action( 'after_setup_theme', 'run_ets_leaky_to_pmpro', 11 );
  * @since    1.0.0
  */
 function run_ets_leaky_to_pmpro() {
+	if ( ! is_plugin_active( 'leaky-paywall/leaky-paywall.php' ) ) {
+		// Deactivate your plugin if Leaky Paywall is not active
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+		return;
+	}
+
 	$plugin = new Ets_Leaky_To_Pmpro();
 	$plugin->run();
 }
+
 
