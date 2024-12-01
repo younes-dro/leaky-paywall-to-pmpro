@@ -133,7 +133,7 @@ class ETS_LeakyToPMPro_Users_CSV {
 
 		$active_members = $wpdb->get_col( $sql );
 
-		$user_batches = array_chunk( $active_members, 400 );
+		$user_batches = array_chunk( $active_members, 100 );
 
 		foreach ( $user_batches as $batch_index => $user_batch ) {
 
