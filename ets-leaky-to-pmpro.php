@@ -16,7 +16,7 @@
  * Plugin Name:       Ets Leaky Paywall To PMPro
  * Plugin URI:        https://expresstechsoftwares.com
  * Description:       LeakyToPMPro Migrator seamlessly transfers subscribers from Leaky Paywall to Paid Memberships Pro (PMPro), ensuring a smooth transition. With this plugin, subscribers gain exclusive privileges, enabling them to comment on and like posts, creating an enhanced and engaging community experience
- * Version:           1.0.3
+ * Version:           1.0.7
  * Author:            ExpressTech Softwares Solutions Pvt Ltd
  * Author URI:        https://expresstechsoftwares.com/
  * License:           GPL-2.0+
@@ -35,7 +35,7 @@ if ( ! defined( 'WPINC' ) ) {
  * Start at version 1.0.0 and use SemVer - https://semver.org
  * Rename this for your plugin and update it as you release new versions.
  */
-define( 'ETS_LEAKY_TO_PMPRO_VERSION', '1.0.3' );
+define( 'ETS_LEAKY_TO_PMPRO_VERSION', '1.0.7' );
 define( 'ETS_LEAKY_TO_PMPRO_PLUGIN_DIR_PATH', plugin_dir_path( __FILE__ ) );
 define( 'ETS_LEAKY_TO_PMPRO_PLUGIN_DIR_URL', plugin_dir_url( __FILE__ ) );
 define( 'ETS_LEAKY_TO_PMPRO_CSV_FOLDER', 'ets-leaky-to-pmpro-csv' );
@@ -89,7 +89,39 @@ add_action( 'after_setup_theme', 'run_ets_leaky_to_pmpro', 11 );
  * @since    1.0.0
  */
 function run_ets_leaky_to_pmpro() {
+	if ( ! is_plugin_active( 'leaky-paywall/leaky-paywall.php' ) ) {
+		// Deactivate The plugin if Leaky Paywall is not active
+		deactivate_plugins( plugin_basename( __FILE__ ) );
+		return;
+	}
+
 	$plugin = new Ets_Leaky_To_Pmpro();
 	$plugin->run();
 }
+
+/**
+ * Custom filter to conditionally allow ad injection based on membership level.
+ *
+ * @param bool   $can_inject Whether the ad can be injected.
+ * @param string $content    Post content.
+ * @param array  $placements Ad placements.
+ *
+ * @return bool Whether the ad can be injected.
+ */
+function custom_advanced_ads_can_inject_into_content( $can_inject, $content, $placements ) {
+
+	if ( is_user_logged_in() && function_exists( 'pmpro_hasMembershipLevel' ) ) {
+		$user_id = get_current_user_id();
+
+		if ( pmpro_hasMembershipLevel( 1, $user_id ) ) {
+			return false;
+		}
+	}
+
+	return $can_inject;
+}
+add_filter( 'advanced-ads-can-inject-into-content', 'custom_advanced_ads_can_inject_into_content', 10, 3 );
+
+
+
 
